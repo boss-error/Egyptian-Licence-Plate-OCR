@@ -34,7 +34,7 @@ Ensure you have Python 3.8 or later installed.
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-username/Egyptian-Licence-Plate-OCR.git
+   git clone https://github.com/boss-error/Egyptian-Licence-Plate-OCR.git
    cd Egyptian-Licence-Plate-OCR
    ```
 
