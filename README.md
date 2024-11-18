@@ -52,6 +52,7 @@ Ensure you have Python 3.8 or later installed.
    ```bash
    download https://drive.google.com/file/d/1825BdRQDH7UT2qo0MTyORIw3kdShr3mK/view?usp=sharing
    and add it in Egyptian-Licence-Plate-OCR/files/my_model.keras
+   ```
 5. edit path in main.py and model.py:
    ```bash
    
@@ -60,7 +61,8 @@ Ensure you have Python 3.8 or later installed.
    to get your path
    cd Egyptian-Licence-Plate-OCR
    pwd
-   and paste it in main.py and model.py   ```
+   and paste it in main.py and model.py
+   ```
 ## Results
 
 ### Architecture Overview
