@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Car License Plate Recognition</title>
+	
+    <link href="{{ url_for('static', filename='bootstrap.min.css') }}" rel="stylesheet">
+    <link rel="stylesheet" href="{{  url_for('static', filename='all.min.css') }}">
+    <link href="{{ url_for('static', filename='css2.css') }}" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .splash-screen, .main-content {
+            display: none;
+            width: 100%;
+            height: 100vh;
+            position: absolute;
+            top: 0;
+            left: 0;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .splash-screen.active {
+            display: flex;
+            background-color: #007BFF;
+            color: #fff;
+            text-align: center;
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        .splash-screen h1 {
+            font-size: 3rem;
+            margin: 0;
+            animation: fadeInUp 1s ease-in-out;
+        }
+
+        .splash-screen button {
+            padding: 15px 30px;
+            background-color: #fff;
+            color: #007BFF;
+            border: none;
+            cursor: pointer;
+            border-radius: 30px;
+            margin-top: 20px;
+            font-size: 1.2rem;
+            transition: background-color 0.3s, transform 0.3s;
+            animation: fadeInUp 1s ease-in-out;
+            animation-delay: 0.5s;
+        }
+
+        .splash-screen button:hover {
+            background-color: #f1f1f1;
+            transform: scale(1.05);
+        }
+
+        .main-content.active {
+            display: block;
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            overflow: auto;
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.1);
+        }
+
+        h1, h2 {
+            text-align: center;
+            color: #333;
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        .section {
+            background: #fff;
+            padding: 30px;
+            margin-bottom: 20px;
+            border-radius: 15px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.1);
+            animation: fadeInUp 1s ease-in-out;
+        }
+
+        .custom-file-input {
+            position: relative;
+            width: 100%;
+            height: 3rem;
+            margin: 10px 0;
+            overflow: hidden;
+            border: 2px dashed #007BFF;
+            border-radius: 12px;
+            background-color: #f8f9fa;
+            text-align: center;
+            padding: 1.5rem 1rem;
+            cursor: pointer;
+            transition: border-color 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .custom-file-input input[type="file"] {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .custom-file-label {
+            display: block;
+            padding: 0.375rem 0.75rem;
+            font-size: 1.2rem;
+            color: #007BFF;
+            pointer-events: none;
+        }
+
+        .custom-file-input:hover {
+            border-color: #0056b3;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            background-color: #f3f3f3;
+            border-radius: 8px;
+            overflow: hidden;
+            margin: 10px 0;
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        .progress-bar {
+            height: 20px;
+            background-color: #007BFF;
+            transition: width 0.3s;
+        }
+
+        .spinner-border {
+            margin: 20px auto;
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        .modal-content {
+            border-radius: 12px;
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        .modal-header {
+            border-bottom: none;
+        }
+
+        .modal-footer {
+            border-top: none;
+        }
+
+        .edit-delete-buttons button {
+            margin-right: 10px;
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        .animation-fadeIn {
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        .animation-fadeInUp {
+            animation: fadeInUp 1s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+
+        @keyframes fadeInUp {
+            0% { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        .detection-item {
+            margin: 10px 0;
+            transition: transform 0.3s;
+            animation: fadeInUp 1s ease-in-out;
+        }
+
+        .detection-item:hover {
+            transform: translateY(-5px);
+        }
+
+        .btn-primary, .btn-secondary, .btn-success, .btn-danger, .btn-info {
+            transition: background-color 0.3s, transform 0.3s;
+            animation: fadeInUp 1s ease-in-out;
+        }
+
+        .btn-primary:hover, .btn-secondary:hover, .btn-success:hover, .btn-danger:hover, .btn-info:hover {
+            transform: scale(1.05);
+        }
+
+        .icon {
+            font-size: 1.5rem;
+            transition: transform 0.3s;
+            animation: fadeInUp 1s ease-in-out;
+        }
+
+        .icon:hover {
+            transform: scale(1.2);
+        }
+
+        .search-bar {
+            position: relative;
+            margin-bottom: 20px;
+            animation: fadeInUp 1s ease-in-out;
+        }
+
+        .search-bar input {
+            width: calc(100% - 50px);
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 25px 0 0 25px;
+            font-size: 1rem;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .search-bar input:focus {
+            border-color: #007BFF;
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+            outline: none;
+        }
+
+        .search-bar button {
+            position: absolute;
+            top: 0;
+            right: 0;
+            padding: 10px;
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+            border-radius: 0 25px 25px 0;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        .search-bar button:hover {
+            background-color: #0056b3;
+            transform: scale(1.05);
+        }
+
+        #detailed-view {
+            background: #fff;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+            animation: fadeInUp 1s ease-in-out;
+            text-align: center;
+        }
+
+        #detailed-view h2 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            color: #007BFF;
+            font-weight: 700;
+        }
+
+        #detailed-image {
+            display: none;
+            border-radius: 12px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            max-width: 100%;
+            height: auto;
+            transition: transform 0.3s;
+        }
+
+        #detailed-image.show {
+            display: block;
+        }
+
+        #detailed-image:hover {
+            transform: scale(1.05);
+        }
+
+        .view-buttons {
+            margin-top: 20px;
+            display: none;
+        }
+
+        .view-buttons.show {
+            display: flex;
+            justify-content: center;
+        }
+
+        .view-buttons button {
+            margin: 5px;
+            transition: background-color 0.3s, transform 0.3s;
+            animation: fadeInUp 1s ease-in-out;
+        }
+
+        .view-buttons button:hover {
+            transform: scale(1.05);
+        }
+
+        .detection-item .index {
+            font-weight: bold;
+            color: #007BFF;
+        }
+
+        .detection-item img {
+            max-height: 150px;
+            width: auto;
+            animation: fadeInUp 1s ease-in-out;
+        }
+
+        #detected-text {
+            display: none;
+            font-size: 1.2rem;
+            margin-top: 20px;
+            color: #007BFF;
+        }
+
+        #detected-text.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="splash-screen active" id="splash-screen">
+        <h1>Welcome to Car License Plate Recognition</h1>
+        <button class="btn btn-lg btn-light" id="enter-button"><i class="fas fa-car icon"></i> Enter</button>
+    </div>
+
+    <div class="main-content" id="main-content">
+        <div class="container my-5">
+            <div class="d-flex justify-content-center mb-4">
+                <button class="btn btn-primary me-2" onclick="showUploadPage()"><i class="fas fa-upload icon"></i> Upload Page</button>
+                <button class="btn btn-secondary" onclick="showManagementPage()"><i class="fas fa-database icon"></i> Data Management</button>
+            </div>
+            <div id="upload-section" class="section animation-fadeInUp">
+                <h1>Upload Car Image</h1>
+                <form id="upload-form" class="d-flex justify-content-center align-items-center flex-column">
+                    <div class="custom-file-input">
+                        <input type="file" id="file" name="file" accept="image/*" required>
+                        <label for="file" class="custom-file-label">Choose file</label>
+                    </div>
+                    <button type="submit" class="btn btn-primary mt-3"><i class="fas fa-upload icon"></i> Upload</button>
+                </form>
+                <div class="progress-bar-container">
+                    <div class="progress-bar" id="progress-bar-inner"></div>
+                </div>
+                <div class="mt-3">
+                    <label for="model-select">Select Model:</label>
+                    <select id="model-select" class="form-select mt-1" onchange="toggleLanguageSelect()">
+                        <option value="cnn">CNN</option>
+                        <option value="easyocr">EasyOCR</option>
+                    </select>
+                    <div id="language-select-container" class="mt-2" style="display: none;">
+                        <label for="language-select">Select Language:</label>
+                        <select id="language-select" class="form-select mt-1">
+                            <option value="en">English</option>
+                            
+                            <!-- Add more languages as needed -->
+                        </select>
+                    </div>
+                </div>
+                <button id="recognize-button" class="btn btn-success mt-3" disabled><i class="fas fa-search icon"></i> Recognize Plate</button>
+                <div id="detailed-view" class="mt-3" data-car-image="" data-plate-image="" data-detected-text="">
+                    <h2>Detailed View</h2>
+                    <div class="view-buttons">
+                        <button class="btn btn-primary" onclick="showImage('car')"><i class="fas fa-car icon"></i> Show Car Image</button>
+                        <button class="btn btn-secondary" onclick="showImage('plate')"><i class="fas fa-clipboard icon"></i> Show Plate Image</button>
+                        <button class="btn btn-info" onclick="showDetectedText()"><i class="fas fa-font icon"></i> Show Detected Text</button>
+                    </div>
+                    <img id="detailed-image" src="" alt="Detailed View" class="img-fluid mt-3">
+                    <div id="detected-text" class="mt-3"></div>
+                </div>
+            </div>
+            <div id="management-section" class="section animation-fadeInUp" style="display: none;">
+                <h1>Detections Management</h1>
+                <div class="search-bar">
+                    <input type="text" id="search-input" placeholder="Search Plate Number...">
+                    <button onclick="searchPlateNumber()"><i class="fas fa-search"></i></button>
+                </div>
+                <div id="detections-list">
+                    <!-- Template for detection items will be inserted here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modal" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalLabel">Detailed View</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <img id="modal-image" src="" alt="Detailed View" class="img-fluid">
+                    <div id="modal-text" class="mt-3"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="errorModalLabel">Error</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="errorModalBody"></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="spinner" class="spinner-border text-primary" role="status" style="display:none;">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+
+    <template id="detection-item-template">
+        <div class="detection-item card mb-3 animation-fadeIn">
+            <div class="row g-0">
+                <div class="col-md-12">
+                    <div class="card-body">
+                        <div class="index"></div>
+                        <h5 class="card-title mt-3"><span class="editable-text" onclick="showDetectionDetails(event)"></span></h5>
+                        <div class="edit-delete-buttons mt-3">
+                            <button class="btn btn-primary" onclick="showModal('car', this)"><i class="fas fa-car icon"></i> Show Car Image</button>
+                            <button class="btn btn-secondary" onclick="showModal('plate', this)"><i class="fas fa-clipboard icon"></i> Show Plate Image</button>
+                            <button class="btn btn-info" onclick="showModal('text', this)"><i class="fas fa-font icon"></i> Show Detected Text</button>
+                            <button class="btn btn-success edit-button"><i class="fas fa-edit icon"></i> Edit</button>
+                            <button class="btn btn-danger delete-button" data-index=""><i class="fas fa-trash icon"></i> Delete</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <script src="{{ url_for('static', filename='bootstrap.bundle.min.js') }}"></script>
+    <script>
+        document.getElementById('enter-button').addEventListener('click', showMainContent);
+
+        function showMainContent() {
+            try {
+                document.getElementById('splash-screen').classList.remove('active');
+                document.getElementById('main-content').classList.add('active');
+                scrollToSection('main-content');
+            } catch (error) {
+                console.error('Error showing main content:', error);
+            }
+        }
+
+        function scrollToSection(sectionId) {
+            document.getElementById(sectionId).scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function showUploadPage() {
+            clearDetailedView();
+            document.getElementById('upload-section').style.display = 'block';
+            document.getElementById('management-section').style.display = 'none';
+            scrollToSection('upload-section');
+        }
+
+        function showManagementPage() {
+            clearDetailedView();
+            document.getElementById('upload-section').style.display = 'none';
+            document.getElementById('management-section').style.display = 'block';
+            loadDetections();
+            scrollToSection('management-section');
+        }
+
+        function clearDetailedView() {
+            const detailedView = document.getElementById('detailed-view');
+            const detailedImage = document.getElementById('detailed-image');
+            const detectedText = document.getElementById('detected-text');
+            const viewButtons = document.querySelector('.view-buttons');
+
+            detailedView.setAttribute('data-car-image', '');
+            detailedView.setAttribute('data-plate-image', '');
+            detailedView.setAttribute('data-detected-text', '');
+            detailedImage.src = '';
+            detailedImage.classList.remove('show');
+            detectedText.classList.remove('show');
+            detectedText.innerText = '';
+            viewButtons.classList.remove('show');
+        }
+
+        function showErrorModal(errorMessage) {
+            const errorModalBody = document.getElementById('errorModalBody');
+            errorModalBody.textContent = errorMessage;
+            const errorModal = new bootstrap.Modal(document.getElementById('errorModal'), {});
+            errorModal.show();
+        }
+
+        document.getElementById('file').addEventListener('change', function(event) {
+            const fileName = event.target.files[0].name;
+            const nextSibling = event.target.nextElementSibling;
+            nextSibling.innerText = fileName;
+        });
+
+        document.getElementById('upload-form').addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            const formData = new FormData();
+            const fileField = document.getElementById('file');
+            formData.append('file', fileField.files[0]);
+
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+                document.getElementById('spinner').style.display = 'none';
+                const detailedView = document.getElementById('detailed-view');
+                const viewButtons = document.querySelector('.view-buttons');
+                if (response.ok) {
+                    if (data.error) {
+                        clearDetailedView();
+                        if (data.error === "No license plate detected") {
+                            showErrorModal('Error: ' + data.error);
+                        }
+                    } else {
+                        document.getElementById('recognize-button').disabled = false;
+                        document.getElementById('recognize-button').setAttribute('data-car-image', '/uploads/' + data.car_image);
+                        document.getElementById('recognize-button').setAttribute('data-plate-image', '/uploads/' + data.plate_image);
+                        detailedView.setAttribute('data-car-image', '/uploads/' + data.car_image);
+                        detailedView.setAttribute('data-plate-image', '/uploads/' + data.plate_image);
+                        detailedView.setAttribute('data-detected-text', '');
+                        viewButtons.classList.add('show');
+                        const detailedImage = document.getElementById('detailed-image');
+                        if (detailedImage) {
+                            detailedImage.src = '/uploads/' + data.car_image;
+                            detailedImage.classList.add('show');
+                        }
+                        scrollToSection('detailed-view');
+                    }
+                } else {
+                    clearDetailedView();
+                    showErrorModal('Error uploading file');
+                }
+            } catch (error) {
+                clearDetailedView();
+                document.getElementById('spinner').style.display = 'none';
+                showErrorModal('Error uploading file');
+            }
+
+            document.getElementById('progress-bar-inner').style.width = '0%';
+            document.getElementById('spinner').style.display = 'none';
+        });
+
+        document.getElementById('recognize-button').addEventListener('click', async function() {
+            const carImage = document.getElementById('recognize-button').getAttribute('data-car-image');
+            const plateImage = document.getElementById('recognize-button').getAttribute('data-plate-image');
+            const model = document.getElementById('model-select').value;
+            const language = document.getElementById('language-select')?.value || '';
+
+            const requestBody = {
+                car_image: carImage,
+                plate_image: plateImage,
+                model: model,
+            };
+
+            if (model === 'easyocr') {
+                requestBody.language = language;
+            }
+
+            try {
+                const response = await fetch('/recognize', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    document.getElementById('detailed-view').setAttribute('data-detected-text', data.text);
+                    document.getElementById('detected-text').innerText = data.text;
+                    document.getElementById('recognize-button').disabled = true;
+                    document.getElementById('upload-form').reset();
+                    loadDetections();
+                } else {
+                    showErrorModal('Error: ' + data.error);
+                }
+            } catch (error) {
+                showErrorModal('Error: ' + error);
+            }
+
+            document.getElementById('progress-bar-inner').style.width = '0%';
+            document.getElementById('spinner').style.display = 'none';
+        });
+
+        async function deleteDetection(button) {
+            const index = button.getAttribute('data-index');
+            if (confirm('Are you sure you want to delete this detection?')) {
+                try {
+                    const response = await fetch('/api/detections/' + index, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    let data;
+                    try {
+                        data = await response.json();
+                    } catch (e) {
+                        throw new Error('Unexpected response format');
+                    }
+
+                    if (response.ok) {
+                        alert(data.success);
+                        loadDetections();
+                    } else {
+                        showErrorModal('Error: ' + data.error);
+                    }
+                } catch (error) {
+                    showErrorModal('Error: ' + error.message);
+                }
+            }
+        }
+
+        async function loadDetections() {
+            try {
+                const response = await fetch('/api/detections');
+                const detections = await response.json();
+
+                const list = document.getElementById('detections-list');
+                list.innerHTML = '';
+                const template = document.getElementById('detection-item-template');
+                detections.forEach((detection, index) => {
+                    const clone = document.importNode(template.content, true);
+                    const item = clone.querySelector('.detection-item');
+                    const plateNumber = item.querySelector('.editable-text');
+                    const indexElement = item.querySelector('.index');
+                    indexElement.innerText = `${index + 1}`;
+                    plateNumber.innerText = detection.plate_number;
+                    item.setAttribute('data-car-image', '/uploads/' + detection.car_image);
+                    item.setAttribute('data-plate-image', '/uploads/' + detection.plate_image);
+                    item.setAttribute('data-detected-text', detection.text || detection.plate_number);
+                    item.querySelector('.edit-button').addEventListener('click', () => editDetection(index, plateNumber));
+                    const deleteButton = item.querySelector('.delete-button');
+                    deleteButton.setAttribute('data-index', index);
+                    deleteButton.addEventListener('click', (event) => deleteDetection(deleteButton));
+                    item.querySelector('.btn-primary').addEventListener('click', () => showModal('car', detection.car_image));
+                    item.querySelector('.btn-secondary').addEventListener('click', () => showModal('plate', detection.plate_image));
+                    item.querySelector('.btn-info').addEventListener('click', () => showModal('text', detection.text || detection.plate_number));
+                    list.appendChild(clone);
+                });
+            } catch (error) {
+                showErrorModal('Error loading detections');
+            }
+        }
+
+        function showDetectionDetails(event) {
+            const detection = event.target.closest('.detection-item');
+            const detailedView = document.getElementById('detailed-view');
+            const viewButtons = document.querySelector('.view-buttons');
+            const carImage = detection.getAttribute('data-car-image');
+            const plateImage = detection.getAttribute('data-plate-image');
+            const detectedText = detection.getAttribute('data-detected-text');
+            detailedView.setAttribute('data-car-image', carImage);
+            detailedView.setAttribute('data-plate-image', plateImage);
+            detailedView.setAttribute('data-detected-text', detectedText);
+            viewButtons.classList.add('show');
+            showImage('car');
+        }
+
+        async function editDetection(index, plateNumberElement) {
+            const newPlateNumber = prompt('Enter the new plate number:', plateNumberElement.innerText);
+            if (newPlateNumber) {
+                try {
+                    const response = await fetch('/api/detections/' + index, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ plate_number: newPlateNumber })
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        plateNumberElement.innerText = newPlateNumber;
+                        alert('Plate number updated successfully!');
+                    } else {
+                        alert('Error: ' + data.error);
+                    }
+                } catch (error) {
+                    alert('Error: ' + error);
+                }
+            }
+        }
+
+        function searchPlateNumber() {
+            const searchTerm = document.getElementById('search-input').value.toLowerCase();
+            const detections = document.querySelectorAll('.detection-item');
+            detections.forEach(detection => {
+                const plateNumber = detection.querySelector('.card-title .editable-text').innerText.toLowerCase();
+                if (plateNumber.includes(searchTerm)) {
+                    detection.style.display = 'block';
+                } else {
+                    detection.style.display = 'none';
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDetections();
+        });
+
+        function showModal(type, data) {
+            const modal = new bootstrap.Modal(document.getElementById('modal'), {});
+            const modalImg = document.getElementById('modal-image');
+            const modalText = document.getElementById('modal-text');
+            if (type === 'car' || type === 'plate') {
+                modalImg.src = data;
+                modalImg.style.display = 'block';
+                modalText.style.display = 'none';
+            } else if (type === 'text') {
+                modalImg.style.display = 'none';
+                modalText.style.display = 'block';
+                modalText.textContent = data;
+            }
+            modal.show();
+
+            document.getElementById('modal').addEventListener('hidden.bs.modal', function () {
+                document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
+            });
+        }
+
+        function showImage(type) {
+            const detailedView = document.getElementById('detailed-view');
+            const detailedImage = document.getElementById('detailed-image');
+            const detectedText = document.getElementById('detected-text');
+            if (type === 'car') {
+                detailedImage.src = detailedView.getAttribute('data-car-image');
+                detailedImage.classList.add('show');
+                detectedText.classList.remove('show');
+            } else if (type === 'plate') {
+                detailedImage.src = detailedView.getAttribute('data-plate-image');
+                detailedImage.classList.add('show');
+                detectedText.classList.remove('show');
+            }
+        }
+
+        function showDetectedText() {
+            const detailedView = document.getElementById('detailed-view');
+            const detectedText = document.getElementById('detected-text');
+            const detailedImage = document.getElementById('detailed-image');
+            detectedText.innerText = detailedView.getAttribute('data-detected-text');
+            detectedText.classList.add('show');
+            detailedImage.classList.remove('show');
+        }
+
+        function toggleLanguageSelect() {
+            const modelSelect = document.getElementById('model-select');
+            const languageSelectContainer = document.getElementById('language-select-container');
+            if (modelSelect.value === 'easyocr') {
+                languageSelectContainer.style.display = 'block';
+            } else {
+                languageSelectContainer.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>
+
