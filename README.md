@@ -38,7 +38,7 @@ Ensure you have Python 3.8 or later installed.
    cd Egyptian-Licence-Plate-OCR
    ```
 
-2. Set up a virtual environment (recommended):
+2. Set up a virtual environment (recommended-Option):
    ```bash
    python -m venv env
    source env/bin/activate  # On Windows: env\Scripts\activate
@@ -48,7 +48,19 @@ Ensure you have Python 3.8 or later installed.
    ```bash
    pip install -r requirements.txt
    ```
-
+4. download OCR download:
+   ```bash
+   download https://drive.google.com/file/d/1825BdRQDH7UT2qo0MTyORIw3kdShr3mK/view?usp=sharing
+and add it in Egyptian-Licence-Plate-OCR/files/my_model.keras
+5. edit path in main.py and model.py:
+   ```bash
+   
+/home/boss/Downloads/project/projectplate/
+to your path 
+to get your path
+cd Egyptian-Licence-Plate-OCR
+pwd
+and paste it in main.py and model.py   ```
 ## Results
 
 ### Architecture Overview
